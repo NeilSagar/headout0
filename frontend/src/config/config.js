@@ -1,2 +1,2 @@
-export const backend_url = "http://localhost:5500/api";
-export const frontend_hosted_url = "http://localhost:5173";
+export const backend_url = import.meta.env.VITE_REACT_APP_BACKEND_URL;
+export const frontend_hosted_url = import.meta.env.VITE_REACT_APP_FRONTEND_URL;
