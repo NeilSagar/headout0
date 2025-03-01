@@ -8,6 +8,7 @@ export const createSession = async (userName) => {
         const response = await axios.post(sessionApiUri,{userName:userName}); // Use await for asynchronous operation
         return response.data;
     } catch (error) {
+        console.log(error);
         console.log("Error occurred while creating session. Error:", error.message || "unknown error"); // Fixed typo
         return null;
     }
