@@ -34,7 +34,7 @@ export const createNewUser = async(userName)=>{
     }
 
     try {
-      console.log("repo hit");
+      // console.log("repo hit");
       const newUser = new userScoreModel({
         userName: userName,
         score: 0, 
@@ -76,3 +76,32 @@ export const addIntoAskedQuestion = async(userId,qid) =>{
     throw error;
   }
 }
+
+
+export const addScore = async(userId,increaseCount)=>{
+  if (!userId || userId.trim() === "") {
+    throw new Error("userId is required.");
+  }
+  if (increaseCount === undefined || increaseCount < 0) {
+    throw new Error("Increase count cannot be negative.");
+  }
+
+  try {
+    const userScore = await userScoreModel.findOne({ userId });
+    if (!userScore) {
+      throw new Error("User not found.");
+    }
+
+    userScore.score += increaseCount;
+
+    await userScore.save();
+
+    return {
+      message: "Score updated successfully.",
+      newScore: userScore.score,
+    };
+  } catch (error) {
+    throw new Error(`Error updating score: ${error.message}`);
+  }
+
+};

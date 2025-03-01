@@ -1,5 +1,5 @@
 import { fetchAnswer, fetchFunFacts, fetchNewQuestion, fetchRandomDestinations } from "../repository/productRepository.js";
-import { addIntoAskedQuestion, fetchAskedQuestionIds } from "../repository/userRepository.js";
+import { addIntoAskedQuestion, addScore, fetchAskedQuestionIds } from "../repository/userRepository.js";
 
 
 export const fetchRandomQuestionService = async (userId) => {
@@ -10,7 +10,9 @@ export const fetchRandomQuestionService = async (userId) => {
 
     try {
         const askedQuestionIds = await fetchAskedQuestionIds(userId);
-        
+        if(askedQuestionIds.length === 10){
+            return null;
+        }
         const newQuestionFetched = await fetchNewQuestion(askedQuestionIds);
 
         if (!newQuestionFetched) {
@@ -33,6 +35,7 @@ export const fetchRandomQuestionService = async (userId) => {
 
         const newQuestion = {
             qid: newQuestionFetched.qid,
+            questionNumber : askedQuestionIds.length + 1,
             clues: newQuestionFetched.clues,
             options: destinationNames, 
         };
@@ -46,7 +49,7 @@ export const fetchRandomQuestionService = async (userId) => {
 };
 
 
-export const checkAnswerAndShareFunFactsService = async(qid,selectedAnswer) =>{
+export const checkAnswerAndShareFunFactsService = async(qid,selectedAnswer,userId) =>{
     if(!qid || qid.trim()==="" || !selectedAnswer || selectedAnswer.trim()===""){
         throw new Error("question's id is required.");
     }
@@ -55,13 +58,22 @@ export const checkAnswerAndShareFunFactsService = async(qid,selectedAnswer) =>{
         const response = {
             isCorrect : false,
             funFacts : null,
+            updatedScore : 0,
         };
+
         if(correctAnswerFetched.toLowerCase() !== selectedAnswer.toLowerCase()){
+            const updatedScoreResponse = await addScore(userId,0);
+            response.updatedScore = updatedScoreResponse.newScore;
             return response;
         }
+        // increase score
+        const updatedScoreResponse = await addScore(userId,1);
         const fetchedFunFacts = await fetchFunFacts(correctAnswerFetched);
+
         response.isCorrect = true;
         response.funFacts = fetchedFunFacts;
+        response.updatedScore = updatedScoreResponse.newScore;
+
         return response;
     } catch (error) {
         throw error;

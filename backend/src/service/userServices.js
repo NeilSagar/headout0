@@ -6,7 +6,7 @@ export const createUserService = async(userName)=>{
         throw new Error( "userName is required.");
     }
     try {
-        console.log("service hit");
+        // console.log("service hit");
         const newUserFetched = await createNewUser(userName);
         const newUser = {
             userId : newUserFetched.userId,

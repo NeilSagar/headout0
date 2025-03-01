@@ -11,8 +11,14 @@ export const fetchRandomQuestion = async(req,res)=>{
     }
     try {
         const questionAndOptions = await fetchRandomQuestionService(userId);
-
+        if(!questionAndOptions){
+            return res.status(200).json({
+                isFetched:false,
+                statusMessage:"User can ask atmost 10 questions."
+            });
+        }
         return res.status(200).json({
+            isFetched:true,
             questionAndOptions:questionAndOptions,
             statusMessage:"fetched question successfully."
         });
@@ -27,15 +33,15 @@ export const fetchRandomQuestion = async(req,res)=>{
 
 
 export const checkAnswerAndShareFunFacts = async(req,res)=>{
-    const {questionId,selectedAnswer} = req.query;
-    if(!questionId || !selectedAnswer || questionId.trim()==="" || selectedAnswer.trim()===""){
+    const {questionId,selectedAnswer,userId} = req.query;
+    if(!userId || !questionId || !selectedAnswer || questionId.trim()==="" || selectedAnswer.trim()==="" || userId.trim()===""){
         return res.status(404).json({
             statusMessage : "questionid and selectedAnswer is required."
         });
     }
     
     try {
-        const response = await checkAnswerAndShareFunFactsService(questionId,selectedAnswer);
+        const response = await checkAnswerAndShareFunFactsService(questionId,selectedAnswer,userId);
         return res.status(200).json(response);
     } catch (error) {
         return res.status(500).json({
