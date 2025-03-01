@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useUserDetails } from '../context/UserContext';
+import { UserDetails } from '../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 
 function Home() {
-  const { userId, fetchUserId } = useUserDetails();
+  const { userId, fetchUserId } = UserDetails();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
 

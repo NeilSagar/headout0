@@ -1,4 +1,4 @@
-import { createNewUser } from "../repository/userRepository.js";
+import { createNewUser, fetchUserDetails } from "../repository/userRepository.js";
 
 
 export const createUserService = async(userName)=>{
@@ -16,4 +16,25 @@ export const createUserService = async(userName)=>{
     } catch (error) {
         throw(error);
     }
+}
+
+
+
+export const fetchUserDetailsService = async(userId)=>{
+    if (!userId || userId.trim() === "") {
+        throw new Error("userId is required.");
+    }
+
+    try {
+        const userDetailsResponse = await fetchUserDetails(userId);
+        if(!userDetailsResponse)return null;
+        const user = {
+            userName : userDetailsResponse.userName,
+            score : userDetailsResponse.score,
+        }
+        return user;
+    } catch (error) {
+        throw error;
+    }
+
 }

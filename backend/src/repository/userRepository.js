@@ -1,7 +1,6 @@
 import questionModel from "../models/mongodb/Question.js";
 import userScoreModel from "../models/mongodb/UserScore.js";
 
-import mongoose from "mongoose";
 
 export const fetchAskedQuestionIds = async (userId) => {
     // Validate the userId
@@ -105,3 +104,19 @@ export const addScore = async(userId,increaseCount)=>{
   }
 
 };
+
+export const fetchUserDetails = async(userId)=>{
+  if (!userId || userId.trim() === "") {
+    throw new Error("userId is required.");
+  }
+
+
+  try {
+    const userDetails = await userScoreModel.findOne({ userId });
+    
+    return userDetails;
+
+  } catch (error) {
+    throw new Error(`Error fetching userDetails: ${error.message || "Internal Server Error."}`);
+  }
+}

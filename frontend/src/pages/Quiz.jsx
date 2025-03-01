@@ -1,61 +1,79 @@
-import React, { useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import Confetti from 'react-confetti';
+import { UserDetails } from '../context/UserContext';
+
+import {useNavigate}  from "react-router-dom";
 
 function Quiz() {
   const [correctAnswerSelected, setCorrectAnswerSelected] = useState(false);
-  const [showFunFacts, setShowFunFacts] = useState(false);
-  const [answerStatus, setAnswerStatus] = useState('');
-  const [currentQuestion, setCurrentQuestion] = useState(0); // Track current question
+  const [answerStatus, setAnswerStatus] = useState(null);
+  const [question,setQuestion] = useState(null);
+  const [options,setOptions] = useState(null);
+  const [funFacts,setFunFacts] = useState(null);
+  const [showResultPageButton,setShowResultPageButton] = useState(false);
 
-  // Fun facts for the city
-  const funFacts = [
-    "The Eiffel Tower is 330 meters tall.",
-    "Paris has 130 museums.",
-    "Paris is known as the 'City of Lights'.",
-    "The Louvre Museum is the largest art museum in the world.",
-  ];
+  const {fetchNextQuestion,currentQuestionCount,userId,checkAnswerAndFetchFunFacts} = UserDetails();
+  const navigate = useNavigate();
 
-  // Questions and options
-  const questions = [
-    {
-      question: "Clues: The capital of France, Known for the Eiffel Tower",
-      options: ["London", "Paris", "Rome", "Berlin"],
-      correctAnswer: "Paris",
-      funFacts: funFacts,
-    },
-    {
-      question: "Clues: Known for pizza and Colosseum, Located in Italy",
-      options: ["Paris", "London", "Rome", "Berlin"],
-      correctAnswer: "Rome",
-      funFacts: [
-        "The Colosseum could hold up to 80,000 spectators.",
-        "Rome is known as the 'Eternal City'.",
-        "There are 280 fountains in Rome.",
-        "Rome has more fountains than any other city in the world.",
-      ],
-    },
-    // Add more questions as needed
-  ];
+  const handleAnswerSelection = async(answer) => {
+    setAnswerStatus(null);
+    const response = await checkAnswerAndFetchFunFacts(answer);
+    if(response){
+      console.log(response);
+      const isCorrect = response.isCorrect;
 
-  const handleAnswerSelection = (answer) => {
-    if (answer === questions[currentQuestion].correctAnswer) { // Correct answer
-      setCorrectAnswerSelected(true);
-      setAnswerStatus('Correct! ' + questions[currentQuestion].correctAnswer + ' is the right answer.');
-      setShowFunFacts(true);
-    } else {
-      setAnswerStatus('Incorrect. ' + questions[currentQuestion].correctAnswer + ' is the correct answer.');
+      if(!isCorrect){
+        const answerStatus = `${answer} is not correct.`;
+        setCorrectAnswerSelected(false);
+        setAnswerStatus(answerStatus);
+      }else{
+        const answerStatus = `${answer} is correct.`;
+        setCorrectAnswerSelected(true);
+        setAnswerStatus(answerStatus);
+        setFunFacts(response.funFacts);
+      }
+      console.log(currentQuestionCount);
+      if(currentQuestionCount == 10){
+        setShowResultPageButton(true);
+      }else{
+        setShowResultPageButton(false);
+      }
     }
+    
   };
 
-  const handleNextQuestion = () => {
-    setCurrentQuestion(currentQuestion + 1); // Move to the next question
-    setCorrectAnswerSelected(false); // Reset answer state
-    setShowFunFacts(false); // Reset fun facts
-    setAnswerStatus(''); // Reset the answer status
+  const handleNextQuestion = async() => {
+    setCorrectAnswerSelected(null);
+    setAnswerStatus(null);
+    setQuestion(null);
+    setOptions(null);
+    setFunFacts(null);
+    
+    const response = await fetchNextQuestion();
+    if(response){
+      setQuestion(response.clues);
+      setOptions(response.options);
+    }
+
   };
 
-  // Make sure not to exceed the question array length
-  const isLastQuestion = currentQuestion === questions.length - 1;
+  useEffect(()=>{
+    async function setNextQuestionAndOptions(){
+      const response = await fetchNextQuestion();
+      if(response){
+        setQuestion(response.clues);
+        setOptions(response.options);
+      }
+    }
+    setNextQuestionAndOptions();
+  },[]);
+
+  useEffect(()=>{
+    if(!userId){
+      navigate("/home");
+    }
+  },[userId]);
+
 
   return (
     <div className="relative flex justify-center items-center min-h-screen bg-gradient-to-r from-green-400 to-blue-500">
@@ -66,12 +84,16 @@ function Quiz() {
         {/* Question Content */}
         {!correctAnswerSelected && (
           <>
-            <h1 className="text-3xl font-bold text-center text-gray-700 mb-4">Question {currentQuestion + 1}</h1>
-            <h2 className="text-2xl font-bold text-center text-gray-700 mb-4">{questions[currentQuestion].question}</h2>
+            <h1 className="text-3xl font-bold text-center text-gray-700 mb-4">Question {currentQuestionCount}</h1>
+            <h2 className="text-2xl font-bold text-center text-gray-700 mb-4">Clues </h2>
+            <h3 className="text-xl font-bold text-center text-gray-500 mb-4">
+              {question && question[0]}
+            </h3>
+            
             <h2 className="text-xl font-bold text-center text-gray-700 mb-4">Options</h2>
 
             <div className="grid grid-cols-2 gap-4">
-              {questions[currentQuestion].options.map((option, index) => (
+              {options && options.map((option, index) => (
                 <button
                   key={index}
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer transform transition-all duration-300"
@@ -94,19 +116,18 @@ function Quiz() {
         )}
 
         {/* Fun Facts Card */}
-        {showFunFacts && (
+        {funFacts && (
           <div className="mt-8 bg-gray-100 p-6 rounded-lg shadow-md overflow-y-auto h-48">
             <h3 className="text-2xl font-semibold text-center text-gray-700 mb-4">Fun Facts</h3>
             <ul className="list-disc pl-6 space-y-2">
-              {questions[currentQuestion].funFacts.map((fact, index) => (
+              {funFacts.map((fact, index) => (
                 <li key={index} className="text-lg text-gray-600">{fact}</li>
               ))}
             </ul>
           </div>
         )}
 
-        {/* Next Question Button */}
-        {answerStatus && !isLastQuestion && (
+        {answerStatus && currentQuestionCount<10 && (
           <div className="mt-6 text-center">
             <button
               onClick={handleNextQuestion}
@@ -117,14 +138,13 @@ function Quiz() {
           </div>
         )}
 
-        {/* End of Quiz Button */}
-        {answerStatus && isLastQuestion && (
-          <div className="mt-6 text-center">
+        {showResultPageButton && (
+          <div className="flex justify-center mt-6">
             <button
-              onClick={() => setCurrentQuestion(0)} // Reset to first question
-              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-300"
+              onClick={() => navigate("/score")}
+              className="px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300 cursor-pointer"
             >
-              Restart Quiz
+              View Results
             </button>
           </div>
         )}
