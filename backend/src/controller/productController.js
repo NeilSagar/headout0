@@ -1,4 +1,4 @@
-import { fetchRandomQuestionService } from "../service/productServices.js";
+import { checkAnswerAndShareFunFactsService, fetchRandomQuestionService } from "../service/productServices.js";
 
 
 
@@ -19,7 +19,7 @@ export const fetchRandomQuestion = async(req,res)=>{
 
     } catch (error) {
         return res.status(500).json({
-            statusMessage:"Internal database Error"
+            statusMessage:error.message || "Internal database Error"
         });
     }
 }
@@ -33,8 +33,13 @@ export const checkAnswerAndShareFunFacts = async(req,res)=>{
             statusMessage : "questionid and selectedAnswer is required."
         });
     }
-
-
-
-    return res.status(200).json({message:"hit"});
+    
+    try {
+        const response = await checkAnswerAndShareFunFactsService(questionId,selectedAnswer);
+        return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({
+            statusMessage : error.message || "Internal server error."
+        });
+    }
 }

@@ -1,3 +1,4 @@
+import questionModel from "../models/mongodb/Question.js";
 import userScoreModel from "../models/mongodb/UserScore.js";
 
 import mongoose from "mongoose";
@@ -44,4 +45,34 @@ export const createNewUser = async(userName)=>{
       const errorMessage = error.message || "Internal Server Error";
       throw new Error(errorMessage);
     }
+}
+
+
+
+export const addIntoAskedQuestion = async(userId,qid) =>{
+  if(!qid){
+    throw new Error("qid required");
+  }
+
+  try {
+
+    const userRecord = await userScoreModel.findOne({ userId: userId });
+    const questionRecord = await questionModel.findOne({qid:qid});
+    if (!userRecord) {
+      throw new Error("userRecord not found.");
+    }
+    if(!questionRecord){
+      throw new Error(`question with qid:${qid} not found.`);
+    }
+
+    if (userRecord.questionsAsked.length < 10) {
+      userRecord.questionsAsked.push(qid);
+      await userRecord.save();
+      return true;  
+    } else {
+      return false;
+    }
+  } catch (error) {
+    throw error;
+  }
 }
