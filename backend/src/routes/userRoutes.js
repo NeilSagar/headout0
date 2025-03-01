@@ -4,6 +4,6 @@ import { createUserSession, fetchScore,fetchUserSession } from "../controller/us
 
 export const userRoutes = Router();
 
-userRoutes.get("/create-user-session",createUserSession);
+userRoutes.post("/create-user-session",createUserSession);
 userRoutes.get("/fetch-user-session",fetchUserSession);
 userRoutes.get("/score",fetchScore);

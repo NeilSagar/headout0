@@ -5,6 +5,7 @@ import cors from "cors";
 import { connectDB } from "./db/mongodb/connection.js";
 import { productRoutes } from "./src/routes/productRoutes.js";
 import { userRoutes } from "./src/routes/userRoutes.js";
+import insertCities from "./src/constants/temp.js";
 
 dotenv.config();
 const app = express();
