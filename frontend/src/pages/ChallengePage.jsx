@@ -1,14 +1,19 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { UserDetails } from "../context/UserContext";
+import CircularIndeterminate from "../components/Loading";
 
 function ChallengePage() {
     const { '*': challengeId } = useParams(); // Retrieves the dynamic part of "/challenge/{value}"
     const { fetchFriendsScore } = UserDetails();
 
+    
     const [friendName, setFriendName] = useState(null);
     const [friendScore, setFriendScore] = useState(null);
     const [errorMessage, setErrorMessage] = useState(null);
+
+    const [isLoading,setIsLoading] = useState(false);
+
     const navigate = useNavigate();
     
     function handleStartChallenge() {
@@ -16,6 +21,7 @@ function ChallengePage() {
     }
 
     async function fetchDetails(id) {
+        setIsLoading(true);
         const response = await fetchFriendsScore(id);
         if (response) {
             setFriendName(response.userName);
@@ -23,6 +29,7 @@ function ChallengePage() {
         } else {
             setErrorMessage("No resource found for this challenge. Please check the link or try again later.");
         }
+        setIsLoading(false);
     } 
 
     useEffect(() => {
@@ -33,8 +40,9 @@ function ChallengePage() {
 
     return (
       <div className="flex flex-col justify-center items-center min-h-screen bg-gradient-to-r from-green-400 to-blue-500 px-4">
-        
-        {/* Beautifully Styled Error Message */}
+        {isLoading?<CircularIndeterminate/>:
+        <>
+            {/* Beautifully Styled Error Message */}
         {errorMessage && (
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md mb-6 max-w-md text-center">
             <p className="font-semibold text-lg">⚠️ Oops! Something went wrong.</p>
@@ -76,6 +84,8 @@ function ChallengePage() {
             </div>
           </div>
         )}
+        </>}
+        
       </div>
     );
 }

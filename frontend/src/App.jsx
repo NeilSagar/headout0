@@ -6,6 +6,7 @@ import Score from './pages/Score.jsx';
 import ChallengePage from './pages/ChallengePage.jsx';
 import { UserProvider } from './context/UserContext.jsx';
 import Temp from './pages/Temp.jsx';
+import CircularIndeterminate from './components/Loading.jsx';
 
 
 

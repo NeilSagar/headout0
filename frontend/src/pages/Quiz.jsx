@@ -3,6 +3,7 @@ import Confetti from 'react-confetti';
 import { UserDetails } from '../context/UserContext';
 
 import {useNavigate}  from "react-router-dom";
+import CircularIndeterminate from '../components/Loading';
 
 function Quiz() {
   const [correctAnswerSelected, setCorrectAnswerSelected] = useState(false);
@@ -11,6 +12,8 @@ function Quiz() {
   const [options,setOptions] = useState(null);
   const [funFacts,setFunFacts] = useState(null);
   const [showResultPageButton,setShowResultPageButton] = useState(false);
+
+  const [isLoading,setIsLoading] = useState(false);
 
   const {fetchNextQuestion,currentQuestionCount,userId,checkAnswerAndFetchFunFacts} = UserDetails();
   const navigate = useNavigate();
@@ -43,6 +46,7 @@ function Quiz() {
   };
 
   const handleNextQuestion = async() => {
+    setIsLoading(true);
     setCorrectAnswerSelected(null);
     setAnswerStatus(null);
     setQuestion(null);
@@ -53,16 +57,19 @@ function Quiz() {
     if(response){
       setQuestion(response.clues);
       setOptions(response.options);
+      setIsLoading(false);
     }
 
   };
 
   useEffect(()=>{
     async function setNextQuestionAndOptions(){
+      setIsLoading(true);
       const response = await fetchNextQuestion();
       if(response){
         setQuestion(response.clues);
         setOptions(response.options);
+        setIsLoading(false);
       }
     }
     setNextQuestionAndOptions();
@@ -77,7 +84,9 @@ function Quiz() {
 
   return (
     <div className="relative flex justify-center items-center min-h-screen bg-gradient-to-r from-green-400 to-blue-500">
-      {/* Confetti Effect on correct answer */}
+      {isLoading?<CircularIndeterminate/>:
+        <>
+          {/* Confetti Effect on correct answer */}
       {correctAnswerSelected && <Confetti />}
       
       <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg overflow-hidden">
@@ -149,6 +158,9 @@ function Quiz() {
           </div>
         )}
       </div>
+        </>
+      }
+      
     </div>
   );
 }
