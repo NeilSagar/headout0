@@ -1,8 +1,9 @@
-import React from 'react';
-import ReactLoading from 'react-loading';
- 
-const Loading = ({ type, color }) => (
-    <ReactLoading type={type} color={color} height={'20%'} width={'20%'} />
-);
- 
-export default Loading;
+import * as React from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+
+export default function CircularIndeterminate() {
+  return (
+    <CircularProgress size="5rem" color="inherit"/>
+  );
+}
