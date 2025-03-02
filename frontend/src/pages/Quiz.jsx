@@ -95,9 +95,21 @@ function Quiz() {
           <>
             <h1 className="text-3xl font-bold text-center text-gray-700 mb-4">Question {currentQuestionCount}</h1>
             <h2 className="text-2xl font-bold text-center text-gray-700 mb-4">Clues </h2>
-            <h3 className="text-xl font-bold text-center text-gray-500 mb-4">
-              {question && question[0]}
-            </h3>
+            
+            {
+              question && question.map((clue, index) => (
+                <div className="flex items-center mb-4">
+                  <svg className="h-5 w-5 text-gray-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm0 0l4 4" />
+                  </svg>
+                  <h3 className="text-xl font-bold text-gray-500 text-left">
+                    {clue}
+                  </h3>
+                </div>
+              ))
+            }
+
+            
             
             <h2 className="text-xl font-bold text-center text-gray-700 mb-4">Options</h2>
 
